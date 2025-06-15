@@ -21,7 +21,7 @@ function BottomNav() {
       <div className="container-fluid d-flex justify-content-around px-2">
         <Link to="/copyResep" className={`nav-link text-center ${isActive('/copyResep') ? 'text-primary fw-bold' : ''}`}>
           <div>📋</div>
-          <small>Copy Resep</small>
+          
         </Link>
         <Link to="/rekap-saldo" className={`nav-link text-center ${isActive('/rekap-saldo') ? 'text-primary fw-bold' : ''}`}>
           <div>📊</div>
@@ -37,7 +37,7 @@ function BottomNav() {
         </Link>
         <Link to="/ganti-password" className={`nav-link text-center ${isActive('/ganti-password') ? 'text-primary fw-bold' : ''}`}>
           <div>🔒</div>
-          <small>Password</small>
+        
         </Link>
         <Link
           to="#"
@@ -50,7 +50,7 @@ function BottomNav() {
           }}
         >
           <div>🔓</div>
-          <small>Logout</small>
+          
         </Link>
       </div>
     </nav>
