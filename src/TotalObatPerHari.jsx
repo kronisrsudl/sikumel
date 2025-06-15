@@ -19,6 +19,8 @@ function TotalObatPerHari() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
+  const API = import.meta.env.VITE_API_URL;
+  
   useEffect(() => {
   fetchRekap();
 
