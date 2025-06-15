@@ -25,15 +25,15 @@ function BottomNav() {
         </Link>
         <Link to="/rekap-saldo" className={`nav-link text-center ${isActive('/rekap-saldo') ? 'text-primary fw-bold' : ''}`}>
           <div>📊</div>
-          <small>Rekap Saldo</small>
+          
         </Link>
         <Link to="/total-obat" className={`nav-link text-center ${isActive('/total-obat') ? 'text-primary fw-bold' : ''}`}>
           <div>💊</div>
-          <small>Total Obat</small>
+          
         </Link>
         <Link to="/serah-terima" className={`nav-link text-center ${isActive('/serah-terima') ? 'text-primary fw-bold' : ''}`}>
           <div>🤝</div>
-          <small>Serah Terima</small>
+        
         </Link>
         <Link to="/ganti-password" className={`nav-link text-center ${isActive('/ganti-password') ? 'text-primary fw-bold' : ''}`}>
           <div>🔒</div>
