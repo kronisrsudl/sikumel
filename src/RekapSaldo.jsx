@@ -21,8 +21,6 @@ function RekapSaldo() {
           <thead className="table-dark text-center align-middle">
             <tr>
               <th>Nama Obat</th>
-              <th>Total Obat</th>
-              <th>Total Pembayaran</th>
               <th>Saldo</th>
               <th>Pending</th>
             </tr>
@@ -31,8 +29,6 @@ function RekapSaldo() {
             {data.map((row, idx) => (
               <tr key={idx}>
                 <td>{row.nama_obat}</td>
-                <td className="text-end">{row.total_jumlah_obat}</td>
-                <td className="text-end">{row.total_jumlah_pembayaran}</td>
                 <td className="text-end text-success">{row.saldo}</td>
                 <td className="text-end text-danger">{row.pending}</td>
               </tr>
