@@ -80,7 +80,7 @@ function Header() {
               letterSpacing: '0.5px',
             }}
           >
-            SIKUMEL
+            SIKUMEL V.2
           </h1>
           <p className="mb-0" style={{ fontSize: '0.9rem', opacity: 0.9 }}>
             Yuk Ngopi, ngopi resep maksutnya.
