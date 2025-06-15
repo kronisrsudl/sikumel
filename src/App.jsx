@@ -49,7 +49,7 @@ function BottomNav() {
             }
           }}
         >
-          <div>🔓</div>
+          <div>📤</div>
           
         </Link>
       </div>
