@@ -17,7 +17,7 @@ function BottomNav() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="navbar fixed-bottom navbar-light bg-light border-top shadow-sm">
+    <nav className="navbar fixed-bottom navbar-light bg-white border-top shadow-sm">
       <div className="container-fluid d-flex justify-content-around px-2">
         <Link to="/copyResep" className={`nav-link text-center ${isActive('/copyResep') ? 'text-primary fw-bold' : ''}`}>
           <div><img src="/copyresep.png" alt="Copy Resep" style={{ height: 36 }} /></div>
