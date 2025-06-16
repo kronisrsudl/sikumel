@@ -20,23 +20,23 @@ function BottomNav() {
     <nav className="navbar fixed-bottom navbar-light bg-light border-top shadow-sm">
       <div className="container-fluid d-flex justify-content-around px-2">
         <Link to="/copyResep" className={`nav-link text-center ${isActive('/copyResep') ? 'text-primary fw-bold' : ''}`}>
-          <div><img src="/copyresep.png" alt="Copy Resep" style={{ height: 24 }} /></div>
+          <div><img src="/copyresep.png" alt="Copy Resep" style={{ height: 36 }} /></div>
           
         </Link>
         <Link to="/rekap-saldo" className={`nav-link text-center ${isActive('/rekap-saldo') ? 'text-primary fw-bold' : ''}`}>
-          <div><img src="/rekapsaldoobat.png" alt="Rekap Saldo Obat" style={{ height: 24 }} /></div>
+          <div><img src="/rekapsaldoobat.png" alt="Rekap Saldo Obat" style={{ height: 36 }} /></div>
           
         </Link>
         <Link to="/total-obat" className={`nav-link text-center ${isActive('/total-obat') ? 'text-primary fw-bold' : ''}`}>
-          <div><img src="rekapobatperhari.png" alt="Total Obat Per Hari" style={{ height: 24 }} /></div>
+          <div><img src="rekapobatperhari.png" alt="Total Obat Per Hari" style={{ height: 36 }} /></div>
           
         </Link>
         <Link to="/serah-terima" className={`nav-link text-center ${isActive('/serah-terima') ? 'text-primary fw-bold' : ''}`}>
-          <div><img src="/serahterimaobat.png" alt="Serah Terima Obat" style={{ height: 24 }} /></div>
+          <div><img src="/serahterimaobat.png" alt="Serah Terima Obat" style={{ height: 36 }} /></div>
         
         </Link>
         <Link to="/ganti-password" className={`nav-link text-center ${isActive('/ganti-password') ? 'text-primary fw-bold' : ''}`}>
-          <div><img src="/password.png" alt="Password" style={{ height: 24 }} /></div>
+          <div><img src="/password.png" alt="Password" style={{ height: 36 }} /></div>
         
         </Link>
         <Link
@@ -49,7 +49,7 @@ function BottomNav() {
             }
           }}
         >
-          <div><img src="/logout.png" alt="Copy Resep" style={{ height: 24 }} /></div>
+          <div><img src="/logout.png" alt="Copy Resep" style={{ height: 36 }} /></div>
           
         </Link>
       </div>
