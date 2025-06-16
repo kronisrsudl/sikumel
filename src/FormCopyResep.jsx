@@ -223,31 +223,56 @@ function FormCopyResep() {
   return (
     <div className="p-4">
       {isAdmin && (
-      <h2 className="text-xl fw-bold mb-4">FORMULIR COPY RESEP KE KF</h2>
-      )}
+  <>
+    {/* FAB Button */}
+    <button
+      className="btn btn-primary rounded-circle shadow position-fixed"
+      style={{
+        bottom: '20px',
+        right: '20px',
+        width: '60px',
+        height: '60px',
+        zIndex: 1050
+      }}
+      data-bs-toggle="modal"
+      data-bs-target="#formModal"
+    >
+      <i className="bi bi-plus-lg"></i>
+    </button>
 
-      {isAdmin && (
-      <form
-        onSubmit={handleCekRM}
-        className="row g-2 align-items-center mb-4"
-      >
-        <div className="col-sm-auto w-100 w-sm-auto">
-          <input
-            type="text"
-            value={noRM}
-            onChange={e => setNoRM(e.target.value)}
-            placeholder="Masukkan No RM"
-            required
-            className="form-control"
-          />
+    {/* Modal */}
+    <div className="modal fade" id="formModal" tabIndex="-1" aria-hidden="true">
+      <div className="modal-dialog modal-dialog-centered">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">Formulir Copy Resep ke KF</h5>
+            <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div className="modal-body">
+            <form onSubmit={handleCekRM} className="row g-2">
+              <div className="col-12">
+                <input
+                  type="text"
+                  value={noRM}
+                  onChange={e => setNoRM(e.target.value)}
+                  placeholder="Masukkan No RM"
+                  required
+                  className="form-control"
+                />
+              </div>
+              <div className="col-12 text-end">
+                <button type="submit" className="btn btn-primary">
+                  Input
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div className="col-sm-auto">
-          <button type="submit" className="btn btn-primary">
-            INPUT
-          </button>
-        </div>
-      </form>
-      )}
+      </div>
+    </div>
+  </>
+)}
+
 
       {/* Modal tambah pasien */}
       {modalTambahPasien && (
