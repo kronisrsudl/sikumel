@@ -228,7 +228,7 @@ function FormCopyResep() {
     <button
       className="btn btn-primary rounded-circle shadow position-fixed d-flex justify-content-center align-items-center"
       style={{
-        bottom: '50px',
+        bottom: '30px',
         right: '20px',
         width: '60px',
         height: '60px',
