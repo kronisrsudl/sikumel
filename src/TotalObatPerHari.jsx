@@ -72,7 +72,7 @@ function TotalObatPerHari() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API}/api/rekap-obat`, {
+      await axios.post(`${API}/api/pembayaran`, {
         nama_obat: namaObat,
         jumlah,
         tanggal
