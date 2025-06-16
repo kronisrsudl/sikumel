@@ -525,7 +525,8 @@ function FormCopyResep() {
       <div className="mb-2">
         <strong>Jumlah Resep (unik berdasarkan No RM): {jumlahResepUnik}</strong>
       </div>
-
+      
+<div class="table-responsive">
       <table className="table table-bordered table-striped table-hover">
         <thead className="table-dark text-center align-middle">
           <tr>
@@ -621,7 +622,7 @@ function FormCopyResep() {
             ))}
         </tbody>
       </table>
-
+</div>
 
     </div>
   );
