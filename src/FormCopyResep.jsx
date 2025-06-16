@@ -224,23 +224,25 @@ function FormCopyResep() {
     <div className="p-4">
       {isAdmin && (
   <>
-    {/* FAB Button */}
+    {/* FAB Floating Button */}
     <button
-      className="btn btn-primary rounded-circle shadow position-fixed"
+      className="btn btn-primary rounded-circle shadow position-fixed d-flex justify-content-center align-items-center"
       style={{
         bottom: '20px',
         right: '20px',
         width: '60px',
         height: '60px',
+        fontSize: '1.5rem',
         zIndex: 1050
       }}
       data-bs-toggle="modal"
       data-bs-target="#formModal"
+      aria-label="Tambah"
     >
-      <i className="bi bi-plus-lg"></i>
+      +
     </button>
 
-    {/* Modal */}
+    {/* Modal Form */}
     <div className="modal fade" id="formModal" tabIndex="-1" aria-hidden="true">
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
@@ -272,6 +274,7 @@ function FormCopyResep() {
     </div>
   </>
 )}
+
 
 
       {/* Modal tambah pasien */}
