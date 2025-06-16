@@ -59,7 +59,7 @@ function RekapSaldo() {
             className="btn btn-outline-secondary"
             onClick={() => setSortAsc(!sortAsc)}
           >
-            {sortAsc ? '🔼 A-Z' : '🔽 Z-A'}
+            {sortAsc ? '🔼' : '🔽'}
           </button>
         </div>
       </div>
