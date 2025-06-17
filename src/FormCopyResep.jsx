@@ -29,6 +29,8 @@ function FormCopyResep() {
   const username = localStorage.getItem('username');
   const isAdmin = username === 'rsudl';
 
+  const [showFabModal, setShowFabModal] = useState(false);
+
   const API = import.meta.env.VITE_API_URL;
 
 
@@ -224,7 +226,7 @@ function FormCopyResep() {
     <div className="p-4">
       {isAdmin && (
   <>
-    {/* FAB Floating Button */}
+    {/* Floating Action Button */}
     <button
       className="btn btn-primary rounded-circle shadow position-fixed d-flex justify-content-center align-items-center"
       style={{
@@ -235,45 +237,58 @@ function FormCopyResep() {
         fontSize: '1.5rem',
         zIndex: 1050
       }}
-      data-bs-toggle="modal"
-      data-bs-target="#formModal"
+      onClick={() => setShowFabModal(true)}
       aria-label="Tambah"
     >
       +
     </button>
 
-    {/* Modal Form */}
-    <div className="modal fade" id="formModal" tabIndex="-1" aria-hidden="true">
-      <div className="modal-dialog modal-dialog-centered">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Formulir Copy Resep ke KF</h5>
-            <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div className="modal-body">
-            <form onSubmit={handleCekRM} className="row g-2">
-              <div className="col-12">
-                <input
-                  type="text"
-                  value={noRM}
-                  onChange={e => setNoRM(e.target.value)}
-                  placeholder="Masukkan No RM"
-                  required
-                  className="form-control"
-                />
-              </div>
-              <div className="col-12 text-end">
-                <button type="submit" className="btn btn-primary">
-                  Input
-                </button>
-              </div>
-            </form>
+    {/* Modal FAB pakai React state */}
+    {showFabModal && (
+      <div className="modal show d-block" tabIndex="-1" role="dialog">
+        <div className="modal-dialog modal-dialog-centered" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Formulir Copy Resep ke KF</h5>
+              <button
+                type="button"
+                className="btn-close"
+                aria-label="Close"
+                onClick={() => setShowFabModal(false)}
+              ></button>
+            </div>
+            <div className="modal-body">
+              <form
+                onSubmit={(e) => {
+                  handleCekRM(e);
+                  setShowFabModal(false); // Tutup setelah submit
+                }}
+                className="row g-2"
+              >
+                <div className="col-12">
+                  <input
+                    type="text"
+                    value={noRM}
+                    onChange={e => setNoRM(e.target.value)}
+                    placeholder="Masukkan No RM"
+                    required
+                    className="form-control"
+                  />
+                </div>
+                <div className="col-12 text-end">
+                  <button type="submit" className="btn btn-primary">
+                    Input
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    )}
   </>
 )}
+
 
 
 
