@@ -27,22 +27,6 @@ function SerahTerimaObat() {
       .catch(err => console.error(err));
   }, []);
 
-  useEffect(() => {
-    if (showFabModal || modalTambahPasien) {
-      document.body.classList.add('modal-open');
-      const backdrop = document.createElement('div');
-      backdrop.className = 'modal-backdrop fade show';
-      document.body.appendChild(backdrop);
-    } else {
-      document.body.classList.remove('modal-open');
-      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-    }
-  
-    return () => {
-      document.body.classList.remove('modal-open');
-      document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-    };
-  }, [showFabModal, modalTambahPasien]);
   
     
   const fetchList = async () => {
