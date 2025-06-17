@@ -49,6 +49,24 @@ function FormCopyResep() {
     fetchSemuaObat(); // ini akan ambil data berdasarkan filter aktif
   }, [tanggalAwal, tanggalAkhir, searchKeyword]);
 
+  // ✅ Untuk kontrol backdrop modal
+useEffect(() => {
+  if (showFabModal || modalTambahPasien) {
+    document.body.classList.add('modal-open');
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop fade show';
+    document.body.appendChild(backdrop);
+  } else {
+    document.body.classList.remove('modal-open');
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+  }
+
+  return () => {
+    document.body.classList.remove('modal-open');
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+  };
+}, [showFabModal, modalTambahPasien]);
+
 
   const fetchSemuaObat = async () => {
     try {
