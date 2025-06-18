@@ -96,7 +96,7 @@ function Header() {
   );
 }
 
-function App() {
+function AppContent() {
 
   const location = useLocation();
   
@@ -127,5 +127,14 @@ function App() {
     </Router>
   );
 }
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
+  );
+}
+
 
 export default App;
