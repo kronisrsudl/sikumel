@@ -12,6 +12,8 @@ import ProtectedRoute from './ProtectedRoute';
 
 import UbahPassword from './UbahPassword';
 
+import Hero from './Hero';
+
 function BottomNav() {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
@@ -99,6 +101,7 @@ function App() {
       <div className="d-flex flex-column min-vh-100">
         <Header />
         <main className="flex-fill px-3 pt-3 pb-5 w-100" style={{ maxWidth: '1980px', margin: '0 auto' }}>
+          <Hero />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/copyResep" element={<ProtectedRoute><FormCopyResep /></ProtectedRoute>} />
