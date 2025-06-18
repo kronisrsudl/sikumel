@@ -15,7 +15,7 @@ function Hero() {
   return (
     <div className="hero-container position-relative text-white text-center overflow-hidden">
       <img
-        src="/pemandangan.jpg" // Ganti dengan file gambar kamu
+        src="/pemandangan.png" // Ganti dengan file gambar kamu
         alt="Pemandangan"
         className="img-fluid w-100 h-100 object-fit-cover"
         style={{ aspectRatio: '1 / 1', objectFit: 'cover', filter: 'brightness(60%)' }}
