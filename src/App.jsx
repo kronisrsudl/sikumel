@@ -96,32 +96,37 @@ function Header() {
 }
 
 function App() {
+  const location = useLocation();
+
   return (
-    <Router>
-      <div className="d-flex flex-column min-vh-100">
-        <Header />
-        <main className="flex-fill px-3 pt-3 pb-5 w-100" style={{ maxWidth: '1980px', margin: '0 auto' }}>
-          <Hero />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/copyResep" element={<ProtectedRoute><FormCopyResep /></ProtectedRoute>} />
-            <Route path="/rekap-saldo" element={<ProtectedRoute><RekapSaldo /></ProtectedRoute>} />
-            <Route path="/total-obat" element={<ProtectedRoute><TotalObatPerHari /></ProtectedRoute>} />
-            <Route path="/serah-terima" element={<ProtectedRoute><SerahTerimaObat /></ProtectedRoute>} />
-            <Route
-              path="/ganti-password"
-              element={
-                <ProtectedRoute>
-                  <UbahPassword />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </main>
-        <BottomNav />
-      </div>
-    </Router>
+    <div className="d-flex flex-column min-vh-100">
+      <Header />
+      <main className="flex-fill px-3 pt-3 pb-5 w-100" style={{ maxWidth: '1980px', margin: '0 auto' }}>
+        
+        {/* ✅ Hero hanya tampil di halaman utama */}
+        {location.pathname === '/' && <Hero />}
+
+        <Routes>
+          <Route path="/" element={<Hero />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/copyResep" element={<ProtectedRoute><FormCopyResep /></ProtectedRoute>} />
+          <Route path="/rekap-saldo" element={<ProtectedRoute><RekapSaldo /></ProtectedRoute>} />
+          <Route path="/total-obat" element={<ProtectedRoute><TotalObatPerHari /></ProtectedRoute>} />
+          <Route path="/serah-terima" element={<ProtectedRoute><SerahTerimaObat /></ProtectedRoute>} />
+          <Route
+            path="/ganti-password"
+            element={
+              <ProtectedRoute>
+                <UbahPassword />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </main>
+      <BottomNav />
+    </div>
   );
 }
+
 
 export default App;
