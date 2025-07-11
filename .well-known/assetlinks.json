@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vercel.hadist_arbain.twa",
+      "sha256_cert_fingerprints": [
+        "F3:2E:04:78:8E:FC:B1:06:CA:23:AB:34:03:41:4B:9F:6A:0B:EA:AC:AF:E3:73:0E:39:4B:5B:1F:0C:97:2D:6B"
+      ]
+    }
+  }
+]
