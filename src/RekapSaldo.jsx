@@ -32,22 +32,22 @@ function RekapSaldo() {
     });
 
   return (
-    <div className="container py-3">
+    <div className="container mx-auto py-3">
       <h4 className="text-center mb-3">📊 Rekap Saldo Obat</h4>
 
-      <div className="row mb-3">
-        <div className="col-md-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+        <div className="col-span-1">
           <input
             type="text"
-            className="form-control"
+            className="w-full px-3 py-2 border rounded-md"
             placeholder="Cari nama obat..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="col-md-6 d-flex gap-2">
+        <div className="col-span-1 flex gap-2">
           <select
-            className="form-select"
+            className="px-3 py-2 border rounded-md"
             value={sortKey}
             onChange={e => setSortKey(e.target.value)}
           >
@@ -56,7 +56,7 @@ function RekapSaldo() {
             <option value="nama_obat">Urutkan: Nama Obat</option>
           </select>
           <button
-            className="btn btn-outline-secondary"
+            className="px-2 py-1 border rounded-md"
             onClick={() => setSortAsc(!sortAsc)}
           >
             {sortAsc ? '🔼' : '🔽'}
@@ -64,21 +64,21 @@ function RekapSaldo() {
         </div>
       </div>
 
-      <div className="table-responsive">
-        <table className="table table-bordered table-striped table-hover">
-          <thead className="table-dark text-center align-middle">
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-200">
+          <thead className="bg-gray-800 text-white text-center align-middle">
             <tr>
-              <th>Nama Obat</th>
-              <th>Saldo</th>
-              <th>Pending</th>
+              <th className="py-2 px-4">Nama Obat</th>
+              <th className="py-2 px-4">Saldo</th>
+              <th className="py-2 px-4">Pending</th>
             </tr>
           </thead>
           <tbody>
             {filteredData.map((row, idx) => (
               <tr key={idx}>
-                <td>{row.nama_obat}</td>
-                <td className="text-end text-success">{row.saldo}</td>
-                <td className="text-end text-danger">{row.pending}</td>
+                <td className="border px-4 py-2">{row.nama_obat}</td>
+                <td className="border px-4 py-2 text-right text-green-500">{row.saldo}</td>
+                <td className="border px-4 py-2 text-right text-red-500">{row.pending}</td>
               </tr>
             ))}
           </tbody>

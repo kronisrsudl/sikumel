@@ -99,13 +99,13 @@ function SerahTerimaObat() {
   };
 
   return (
-    <div className="container">
+    <div className="container mx-auto">
       <h4 className="text-center my-3">🤝 Serah Terima Obat</h4>
       {isAdmin && (
-      <form onSubmit={handleSubmit} className="row g-3 mb-4">
-        <div className="col-md-4 position-relative">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+        <div className="col-span-1 relative">
           <input
-            className="form-control"
+            className="w-full px-3 py-2 border rounded-md"
             placeholder="Nama Obat"
             value={namaObat}
             onChange={handleNamaObatChange}
@@ -113,12 +113,11 @@ function SerahTerimaObat() {
             autoComplete="off"
           />
           {saranObat.length > 0 && (
-            <ul className="list-group position-absolute w-100 z-3">
+            <ul className="absolute w-full bg-white border rounded-md mt-1 z-10">
               {saranObat.map((item, idx) => (
                 <li
                   key={idx}
-                  className="list-group-item"
-                  style={{ cursor: 'pointer' }}
+                  className="p-2 cursor-pointer hover:bg-gray-200"
                   onClick={() => {
                     setNamaObat(item.nama_obat);
                     setSaranObat([]);
@@ -130,31 +129,31 @@ function SerahTerimaObat() {
             </ul>
           )}
         </div>
-        <div className="col-md-3">
+        <div className="col-span-1">
           <input
             type="number"
-            className="form-control"
+            className="w-full px-3 py-2 border rounded-md"
             placeholder="Jumlah"
             value={jumlah}
             onChange={(e) => setJumlah(e.target.value)}
             required
           />
         </div>
-        <div className="col-md-3">
+        <div className="col-span-1">
           <input
             type="date"
-            className="form-control"
+            className="w-full px-3 py-2 border rounded-md"
             value={tanggal}
             onChange={(e) => setTanggal(e.target.value)}
             required
           />
         </div>
-        <div className="col-md-2">
-          <button className="btn btn-primary w-100">Simpan</button>
+        <div className="col-span-1">
+          <button className="bg-blue-500 text-white w-full py-2 rounded-md">Simpan</button>
           {editId && (
-          <div className="col-md-12 text-end">
+          <div className="text-right mt-2">
             <button
-              className="btn btn-secondary"
+              className="bg-gray-500 text-white px-3 py-1 rounded-md"
               onClick={() => {
                 setEditId(null);
                 setNamaObat('');
@@ -171,11 +170,11 @@ function SerahTerimaObat() {
       </form>
       )}
 
-      <div className="table-responsive">
-        <div className="d-flex justify-content-between align-items-center my-3">
+      <div className="overflow-x-auto">
+        <div className="flex justify-between items-center my-3">
         <input
             type="text"
-            className="form-control w-50"
+            className="w-1/2 px-3 py-2 border rounded-md"
             placeholder="Cari nama obat atau tanggal..."
             value={searchTerm}
             onChange={(e) => {
@@ -185,16 +184,16 @@ function SerahTerimaObat() {
         />
         </div>
 
-        <table className="table table-bordered table-striped table-hover">
-          <thead className="table-dark text-center align-middle">
+        <table className="min-w-full bg-white border border-gray-200">
+          <thead className="bg-gray-800 text-white text-center align-middle">
             <tr>
-              <th>ID</th>
-              <th>Nama Obat</th>
-              <th>Jumlah</th>
-              <th>Untuk Tanggal</th>
-              <th>Tanggal Transaksi</th>
+              <th className="py-2 px-4">ID</th>
+              <th className="py-2 px-4">Nama Obat</th>
+              <th className="py-2 px-4">Jumlah</th>
+              <th className="py-2 px-4">Untuk Tanggal</th>
+              <th className="py-2 px-4">Tanggal Transaksi</th>
               {isAdmin && (
-              <th>Aksi</th>
+              <th className="py-2 px-4">Aksi</th>
               )}
             </tr>
           </thead>
@@ -208,17 +207,17 @@ function SerahTerimaObat() {
                 .map((item, idx) => (
 
               <tr key={idx}>
-                <td>{item.id}</td>
-                <td>{item.nama_obat}</td>
-                <td className="text-end">{item.total}</td>
-                <td>{new Date(item.tanggal).toLocaleDateString()}</td>
-                <td>{new Date(item.tanggal_transaksi).toLocaleString()}</td>
+                <td className="border px-4 py-2">{item.id}</td>
+                <td className="border px-4 py-2">{item.nama_obat}</td>
+                <td className="border px-4 py-2 text-right">{item.total}</td>
+                <td className="border px-4 py-2">{new Date(item.tanggal).toLocaleDateString()}</td>
+                <td className="border px-4 py-2">{new Date(item.tanggal_transaksi).toLocaleString()}</td>
                 {isAdmin && (
-                <td className="text-center">
-                <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(item)}>
+                <td className="border px-4 py-2 text-center">
+                <button className="bg-yellow-500 text-white px-2 py-1 rounded-md mr-2" onClick={() => handleEdit(item)}>
                   Edit
                 </button>
-                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(item.id)}>
+                <button className="bg-red-500 text-white px-2 py-1 rounded-md" onClick={() => handleDelete(item.id)}>
                   Hapus
                 </button>
               </td>
@@ -227,9 +226,9 @@ function SerahTerimaObat() {
             ))}
           </tbody>
         </table>
-        <div className="d-flex justify-content-between align-items-center mt-4">
+        <div className="flex justify-between items-center mt-4">
         <button
-            className="btn btn-outline-primary"
+            className="bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded-md"
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
         >
@@ -239,7 +238,7 @@ function SerahTerimaObat() {
         <span>Halaman {currentPage}</span>
 
         <button
-            className="btn btn-outline-primary"
+            className="bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded-md"
             onClick={() => {
             const totalFiltered = list.filter(item =>
                 item.nama_obat.toLowerCase().includes(searchTerm.toLowerCase()) ||

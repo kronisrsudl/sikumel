@@ -52,18 +52,18 @@ function FormCopyResep() {
   // ✅ Untuk kontrol backdrop modal
 useEffect(() => {
   if (showFabModal || modalTambahPasien) {
-    document.body.classList.add('modal-open');
+    document.body.classList.add('overflow-hidden');
     const backdrop = document.createElement('div');
-    backdrop.className = 'modal-backdrop fade show';
+    backdrop.className = 'fixed inset-0 bg-black bg-opacity-50 z-40';
     document.body.appendChild(backdrop);
   } else {
-    document.body.classList.remove('modal-open');
-    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+    document.body.classList.remove('overflow-hidden');
+    document.querySelectorAll('.fixed.inset-0.bg-black.bg-opacity-50.z-40').forEach(el => el.remove());
   }
 
   return () => {
-    document.body.classList.remove('modal-open');
-    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+    document.body.classList.remove('overflow-hidden');
+    document.querySelectorAll('.fixed.inset-0.bg-black.bg-opacity-50.z-40').forEach(el => el.remove());
   };
 }, [showFabModal, modalTambahPasien]);
 
@@ -142,6 +142,13 @@ useEffect(() => {
 
   const handleSubmitObat = async (e) => {
     e.preventDefault();
+
+    const obatIsValid = dataObat.some(o => o.nama_obat.toLowerCase() === namaObat.toLowerCase());
+    if (!obatIsValid) {
+      alert('Nama obat tidak valid. Harap pilih dari daftar yang tersedia.');
+      return;
+    }
+
     try {
       await axios.post(`${API}/api/obat`, {
         no_rm: parseInt(currentNoRM),
@@ -192,10 +199,30 @@ useEffect(() => {
       harga: item.harga,
       jumlah: item.jumlah
     });
+    setSaranObat([]);
     setModalEditObat(true);
   };
 
+  const handleEditObatChange = (e) => {
+    const val = e.target.value;
+    setDataEdit({ ...dataEdit, nama_obat: val });
+
+    if (val.length >= 2) {
+      const filter = dataObat.filter(o => o.nama_obat.toLowerCase().includes(val.toLowerCase()));
+      setSaranObat(filter);
+      setHighlightIndex(-1);
+    } else {
+      setSaranObat([]);
+    }
+  };
+
   const handleSimpanEdit = async () => {
+    const obatIsValid = dataObat.some(o => o.nama_obat.toLowerCase() === dataEdit.nama_obat.toLowerCase());
+    if (!obatIsValid) {
+      alert('Nama obat tidak valid. Harap pilih dari daftar yang tersedia.');
+      return;
+    }
+
     try {
       await axios.put(`${API}/api/obat/${dataEdit.id}`, {
         nama_obat: dataEdit.nama_obat,
@@ -246,7 +273,7 @@ useEffect(() => {
   <>
     {/* Floating Action Button */}
     <button
-      className="btn btn-primary rounded-circle shadow position-fixed d-flex justify-content-center align-items-center"
+      className="bg-blue-500 text-white rounded-full shadow-lg fixed flex justify-center items-center"
       style={{
         bottom: '30px',
         right: '20px',
@@ -263,43 +290,43 @@ useEffect(() => {
 
     {/* Modal FAB pakai React state */}
     {showFabModal && (
-      <div className="modal show d-block" tabIndex="-1" role="dialog">
-        <div className="modal-dialog modal-dialog-centered" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Formulir Copy Resep ke KF</h5>
-              <button
-                type="button"
-                className="btn-close"
-                aria-label="Close"
-                onClick={() => setShowFabModal(false)}
-              ></button>
-            </div>
-            <div className="modal-body">
-              <form
-                onSubmit={(e) => {
-                  handleCekRM(e);
-                  setShowFabModal(false); // Tutup setelah submit
-                }}
-                className="row g-2"
-              >
-                <div className="col-12">
-                  <input
-                    type="text"
-                    value={noRM}
-                    onChange={e => setNoRM(e.target.value)}
-                    placeholder="Masukkan No RM"
-                    required
-                    className="form-control"
-                  />
-                </div>
-                <div className="col-12 text-end">
-                  <button type="submit" className="btn btn-primary">
-                    Input
-                  </button>
-                </div>
-              </form>
-            </div>
+      <div className="fixed inset-0 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-auto">
+          <div className="p-4 border-b">
+            <h5 className="text-lg font-bold">Formulir Copy Resep ke KF</h5>
+            <button
+              type="button"
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+              aria-label="Close"
+              onClick={() => setShowFabModal(false)}
+            >
+              &times;
+            </button>
+          </div>
+          <div className="p-4">
+            <form
+              onSubmit={(e) => {
+                handleCekRM(e);
+                setShowFabModal(false); // Tutup setelah submit
+              }}
+              className="grid grid-cols-1 gap-2"
+            >
+              <div className="col-span-1">
+                <input
+                  type="text"
+                  value={noRM}
+                  onChange={e => setNoRM(e.target.value)}
+                  placeholder="Masukkan No RM"
+                  required
+                  className="w-full px-3 py-2 border rounded-md"
+                />
+              </div>
+              <div className="col-span-1 text-right">
+                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md">
+                  Input
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -312,46 +339,44 @@ useEffect(() => {
 
       {/* Modal tambah pasien */}
       {modalTambahPasien && (
-        <div className="modal show d-block" tabIndex="-1" role="dialog">
-          <div className="modal-dialog modal-dialog-centered" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Pasien belum terdaftar</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  aria-label="Close"
-                  onClick={() => setModalTambahPasien(false)}
-                ></button>
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-auto">
+            <div className="p-4 border-b">
+              <h5 className="text-lg font-bold">Pasien belum terdaftar</h5>
+              <button
+                type="button"
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                aria-label="Close"
+                onClick={() => setModalTambahPasien(false)}
+              >&times;</button>
+            </div>
+            <div className="p-4">
+              <div className="mb-3">
+                <label className="block mb-1">Nama Pasien:</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={namaPasien}
+                  onChange={e => setNamaPasien(e.target.value)}
+                  required
+                />
               </div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <label className="form-label">Nama Pasien:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={namaPasien}
-                    onChange={e => setNamaPasien(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setModalTambahPasien(false)}
-                >
-                  Batal
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleSimpanPasienBaru}
-                >
-                  Simpan & Input Obat
-                </button>
-              </div>
+            </div>
+            <div className="p-4 border-t flex justify-end">
+              <button
+                type="button"
+                className="bg-gray-500 text-white px-4 py-2 rounded-md mr-2"
+                onClick={() => setModalTambahPasien(false)}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                onClick={handleSimpanPasienBaru}
+              >
+                Simpan & Input Obat
+              </button>
             </div>
           </div>
         </div>
@@ -360,185 +385,217 @@ useEffect(() => {
 
       {/* Modal input obat */}
       {modalInputObat && (
-        <div className="modal show d-block" tabIndex="-1" role="dialog">
-          <div className="modal-dialog modal-dialog-centered" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  Input Obat untuk Pasien: {namaPasien} (RM: {currentNoRM})
-                </h5>
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-auto">
+            <div className="p-4 border-b">
+              <h5 className="text-lg font-bold">
+                Input Obat untuk Pasien: {namaPasien} (RM: {currentNoRM})
+              </h5>
+              <button
+                type="button"
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                aria-label="Close"
+                onClick={() => {
+                  setModalInputObat(false);
+                  setNamaObat('');
+                  setHarga('');
+                  setJumlah(1);
+                }}
+              >&times;</button>
+            </div>
+
+            <form onSubmit={handleSubmitObat}>
+              <div className="p-4">
+                <div className="mb-3">
+                  <label className="block mb-1">Nama Obat:</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border rounded-md"
+                    value={namaObat}
+                    onChange={handleObatChange}
+                    onKeyDown={handleObatKeyDown}
+                    autoComplete="off"
+                    required
+                  />
+                  {saranObat.length > 0 && (
+                    <ul className="mt-2 border rounded-md">
+                      {saranObat.map((item, idx) => (
+                        <li
+                          key={idx}
+                          className={`p-2 cursor-pointer ${
+                            highlightIndex === idx ? 'bg-blue-500 text-white' : ''
+                          }`}
+                          onClick={() => {
+                            setNamaObat(item.nama_obat);
+                            setHarga(item.harga);
+                            setSaranObat([]);
+                          }}
+                        >
+                          {item.nama_obat} ({item.harga})
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div className="mb-3">
+                  <label className="block mb-1">Harga:</label>
+                  <input type="number" className="w-full px-3 py-2 border rounded-md bg-gray-100" value={harga} readOnly />
+                </div>
+
+                <div className="mb-3">
+                  <label className="block mb-1">Jumlah:</label>
+                  <input
+                    type="number"
+                    className="w-full px-3 py-2 border rounded-md"
+                    value={jumlah}
+                    onChange={e => setJumlah(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="p-4 border-t flex justify-end">
+                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md">
+                  Simpan Obat
+                </button>
                 <button
                   type="button"
-                  className="btn-close"
-                  aria-label="Close"
+                  className="bg-gray-500 text-white px-4 py-2 rounded-md ml-2"
                   onClick={() => {
                     setModalInputObat(false);
                     setNamaObat('');
                     setHarga('');
                     setJumlah(1);
                   }}
-                ></button>
+                >
+                  Selesai
+                </button>
               </div>
-
-              <form onSubmit={handleSubmitObat}>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <label className="form-label">Nama Obat:</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={namaObat}
-                      onChange={handleObatChange}
-                      onKeyDown={handleObatKeyDown}
-                      autoComplete="off"
-                      required
-                    />
-                    {saranObat.length > 0 && (
-                      <ul className="list-group mt-2">
-                        {saranObat.map((item, idx) => (
-                          <li
-                            key={idx}
-                            className={`list-group-item ${
-                              highlightIndex === idx ? 'active text-white' : ''
-                            }`}
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => {
-                              setNamaObat(item.nama_obat);
-                              setHarga(item.harga);
-                              setSaranObat([]);
-                            }}
-                          >
-                            {item.nama_obat} ({item.harga})
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label">Harga:</label>
-                    <input type="number" className="form-control" value={harga} readOnly />
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label">Jumlah:</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      value={jumlah}
-                      onChange={e => setJumlah(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="modal-footer">
-                  <button type="submit" className="btn btn-primary">
-                    Simpan Obat
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => {
-                      setModalInputObat(false);
-                      setNamaObat('');
-                      setHarga('');
-                      setJumlah(1);
-                    }}
-                  >
-                    Selesai
-                  </button>
-                </div>
-              </form>
-            </div>
+            </form>
           </div>
         </div>
 
       )}
 
       {modalEditObat && (
-        <div className="modal show d-block" tabIndex="-1">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Edit Obat</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setModalEditObat(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <label className="form-label">Nama Obat</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={dataEdit.nama_obat}
-                    onChange={(e) =>
-                      setDataEdit({ ...dataEdit, nama_obat: e.target.value })
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-auto">
+            <div className="p-4 border-b">
+              <h5 className="text-lg font-bold">Edit Obat</h5>
+              <button
+                type="button"
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                onClick={() => setModalEditObat(false)}
+              >&times;</button>
+            </div>
+            <div className="p-4">
+              <div className="mb-3">
+                <label className="block mb-1">Nama Obat</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={dataEdit.nama_obat}
+                  onChange={handleEditObatChange}
+                  onKeyDown={(e) => {
+                    if (saranObat.length === 0) return;
+                    if (e.key === 'ArrowDown') {
+                      setHighlightIndex(prev => (prev + 1) % saranObat.length);
+                    } else if (e.key === 'ArrowUp') {
+                      setHighlightIndex(prev => (prev - 1 + saranObat.length) % saranObat.length);
+                    } else if (e.key === 'Enter' && highlightIndex >= 0) {
+                      const selected = saranObat[highlightIndex];
+                      setDataEdit({
+                        ...dataEdit,
+                        nama_obat: selected.nama_obat,
+                        harga: selected.harga
+                      });
+                      setSaranObat([]);
+                      e.preventDefault();
                     }
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Harga</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={dataEdit.harga}
-                    onChange={(e) =>
-                      setDataEdit({ ...dataEdit, harga: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label">Jumlah</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={dataEdit.jumlah}
-                    onChange={(e) =>
-                      setDataEdit({ ...dataEdit, jumlah: e.target.value })
-                    }
-                  />
-                </div>
+                  }}
+                  autoComplete="off"
+                />
+                {saranObat.length > 0 && (
+                  <ul className="mt-2 border rounded-md">
+                    {saranObat.map((item, idx) => (
+                      <li
+                        key={idx}
+                        className={`p-2 cursor-pointer ${
+                          highlightIndex === idx ? 'bg-blue-500 text-white' : ''
+                        }`}
+                        onClick={() => {
+                          setDataEdit({
+                            ...dataEdit,
+                            nama_obat: item.nama_obat,
+                            harga: item.harga
+                          });
+                          setSaranObat([]);
+                        }}
+                      >
+                        {item.nama_obat} ({item.harga})
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setModalEditObat(false)}
-                >
-                  Batal
-                </button>
-                <button className="btn btn-primary" onClick={handleSimpanEdit}>
-                  Simpan Perubahan
-                </button>
+              
+              <div className="mb-3">
+                <label className="block mb-1">Harga</label>
+                <input
+                  type="number"
+                  className="w-full px-3 py-2 border rounded-md bg-gray-100"
+                  value={dataEdit.harga}
+                  readOnly
+                />
               </div>
+              <div className="mb-3">
+                <label className="block mb-1">Jumlah</label>
+                <input
+                  type="number"
+                  className="w-full px-3 py-2 border rounded-md"
+                  value={dataEdit.jumlah}
+                  onChange={(e) =>
+                    setDataEdit({ ...dataEdit, jumlah: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="p-4 border-t flex justify-end">
+              <button
+                className="bg-gray-500 text-white px-4 py-2 rounded-md mr-2"
+                onClick={() => setModalEditObat(false)}
+              >
+                Batal
+              </button>
+              <button className="bg-blue-500 text-white px-4 py-2 rounded-md" onClick={handleSimpanEdit}>
+                Simpan Perubahan
+              </button>
             </div>
           </div>
         </div>
       )}
 
 
-     <h3 className="fw-bold mb-3">Data Obat</h3>
+     <h3 className="font-bold mb-3">Data Obat</h3>
 
-      <div className="row g-3 align-items-center mb-3">
-        <div className="col-md-3">
-          <label htmlFor="startDate" className="form-label">Dari Tanggal:</label>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-center mb-3">
+        <div className="col-span-1">
+          <label htmlFor="startDate" className="block mb-1">Dari Tanggal:</label>
           <input
             id="startDate"
             type="date"
-            className="form-control"
+            className="w-full px-3 py-2 border rounded-md"
             value={tanggalAwal}
             onChange={e => setTanggalAwal(e.target.value)}
           />
         </div>
-        <div className="col-md-3">
-          <label htmlFor="endDate" className="form-label">Hingga Tanggal:</label>
+        <div className="col-span-1">
+          <label htmlFor="endDate" className="block mb-1">Hingga Tanggal:</label>
           <input
             id="endDate"
             type="date"
-            className="form-control"
+            className="w-full px-3 py-2 border rounded-md"
             value={tanggalAkhir}
             onChange={e => setTanggalAkhir(e.target.value)}
           />
@@ -546,11 +603,11 @@ useEffect(() => {
       </div>
 
 
-      <div className="row mb-3">
-        <div className="col-md-6">
+      <div className="mb-3">
+        <div className="w-full md:w-1/2">
           <input
             type="text"
-            className="form-control"
+            className="w-full px-3 py-2 border rounded-md"
             placeholder="Cari nama obat / pasien / No RM"
             value={searchKeyword}
             onChange={(e) => setSearchKeyword(e.target.value)}
@@ -558,11 +615,11 @@ useEffect(() => {
         </div>
       </div>
 
-      <div className="row mb-3">
-        <div className="col-md-6 d-flex align-items-center gap-2">
-          <label className="form-label mb-0">Urutkan:</label>
+      <div className="mb-3">
+        <div className="w-full md:w-1/2 flex items-center gap-2">
+          <label className="mb-0">Urutkan:</label>
           <select
-            className="form-select"
+            className="px-3 py-2 border rounded-md"
             style={{ maxWidth: '200px' }}
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
@@ -574,7 +631,7 @@ useEffect(() => {
           </select>
 
           <button
-            className="btn btn-outline-secondary btn-sm"
+            className="px-2 py-1 border rounded-md text-sm"
             onClick={() => setSortAsc(!sortAsc)}
             title="Balikkan arah urutan"
           >
@@ -587,19 +644,19 @@ useEffect(() => {
         <strong>Jumlah Resep (unik berdasarkan No RM): {jumlahResepUnik}</strong>
       </div>
       
-<div class="table-responsive">
-      <table className="table table-bordered table-striped table-hover">
-        <thead className="table-dark text-center align-middle">
+<div class="overflow-x-auto">
+      <table className="min-w-full bg-white border border-gray-200">
+        <thead className="bg-gray-800 text-white text-center align-middle">
           <tr>
-            <th>No RM</th>
-            <th>Nama Pasien</th>
-            <th>Nama Obat</th>
-            <th>Jumlah</th>
-            <th>Harga</th>
-            <th>Tanggal</th>
-            <th>Status</th>
+            <th className="py-2 px-4">No RM</th>
+            <th className="py-2 px-4">Nama Pasien</th>
+            <th className="py-2 px-4">Nama Obat</th>
+            <th className="py-2 px-4">Jumlah</th>
+            <th className="py-2 px-4">Harga</th>
+            <th className="py-2 px-4">Tanggal</th>
+            <th className="py-2 px-4">Status</th>
             {isAdmin && (
-            <th>Aksi</th>
+            <th className="py-2 px-4">Aksi</th>
             )}
           </tr>
         </thead>
@@ -609,7 +666,7 @@ useEffect(() => {
               const tglOk = filterByTanggal(item.tanggal);
               const keyword = searchKeyword.toLowerCase();
 
-              const matchKeyword =
+              const matchKeyword = 
                 item.nama_obat.toLowerCase().includes(keyword) ||
                 item.rekam_medis?.nama_pasien?.toLowerCase().includes(keyword) ||
                 String(item.no_rm).includes(keyword);
@@ -649,30 +706,30 @@ useEffect(() => {
 
             .map((item, index) => (
               <tr key={index}>
-                <td>{item.no_rm}</td>
-                <td>{item.rekam_medis?.nama_pasien || '-'}</td>
-                <td>{item.nama_obat}</td>
-                <td>{item.jumlah}</td>
-                <td>Rp {parseFloat(item.harga * item.jumlah).toLocaleString('id-ID')}</td>
-                <td>{new Date(item.tanggal).toLocaleString()}</td>
-                <td>
+                <td className="border px-4 py-2">{item.no_rm}</td>
+                <td className="border px-4 py-2">{item.rekam_medis?.nama_pasien || '-'}</td>
+                <td className="border px-4 py-2">{item.nama_obat}</td>
+                <td className="border px-4 py-2">{item.jumlah}</td>
+                <td className="border px-4 py-2">Rp {parseFloat(item.harga * item.jumlah).toLocaleString('id-ID')}</td>
+                <td className="border px-4 py-2">{new Date(item.tanggal).toLocaleString()}</td>
+                <td className="border px-4 py-2">
                   <button
-                    className={`btn btn-sm ${item.sudah_diserahkan ? 'btn-success' : 'btn-warning text-dark'}`}
+                    className={`px-2 py-1 text-sm rounded ${item.sudah_diserahkan ? 'bg-green-500 text-white' : 'bg-yellow-400 text-black'}`}
                     onClick={() => toggleStatusDiserahkan(item.id, item.sudah_diserahkan)}
                   >
                     {item.sudah_diserahkan ? 'Diserahkan' : 'Belum'}
                   </button>
                 </td>
                 {isAdmin && (
-                <td>
+                <td className="border px-4 py-2">
                   <button
-                    className="btn btn-sm btn-warning me-2"
+                    className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
                     onClick={() => bukaModalEdit(item)}
                   >
                     Edit
                   </button>
                   <button
-                    className="btn btn-sm btn-danger"
+                    className="bg-red-500 text-white px-2 py-1 rounded"
                     onClick={() => handleHapusObat(item.id)}
                   >
                     Hapus

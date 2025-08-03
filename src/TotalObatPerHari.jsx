@@ -96,13 +96,13 @@ function TotalObatPerHari() {
   };
 
   return (
-    <div className="container">
+    <div className="container mx-auto">
       <h4 className="text-center my-3">💊 Rekap Obat per Hari</h4>
       {isAdmin && (
-      <form onSubmit={handleSubmit} className="row g-3 mb-4">
-        <div className="col-md-4 position-relative">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+        <div className="col-span-1 relative">
         <input
-            className="form-control"
+            className="w-full px-3 py-2 border rounded-md"
             placeholder="Nama Obat"
             value={namaObat}
             onChange={handleNamaObatChange}
@@ -111,46 +111,45 @@ function TotalObatPerHari() {
             autoComplete="off"
         />
         {saranObat.length > 0 && (
-            <ul className="list-group position-absolute w-100 z-3" style={{ maxHeight: 200, overflowY: 'auto' }}>
+            <ul className="absolute w-full bg-white border rounded-md mt-1 z-10" style={{ maxHeight: 200, overflowY: 'auto' }}>
             {saranObat.map((item, index) => (
                 <li
                 key={index}
-                className={`list-group-item ${index === highlightIndex ? 'active text-white' : ''}`}
-                style={{ cursor: 'pointer' }}
+                className={`p-2 cursor-pointer ${index === highlightIndex ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'}`}
                 onClick={() => {
                     setNamaObat(item.nama_obat);
                     setSaranObat([]);
                     setHighlightIndex(-1);
                 }}
                 >
-                {item.nama_obat} <span className="text-muted">({item.harga})</span>
+                {item.nama_obat} <span className="text-gray-500">({item.harga})</span>
                 </li>
             ))}
             </ul>
         )}
         </div>
 
-        <div className="col-md-3">
+        <div className="col-span-1">
           <input
             type="number"
-            className="form-control"
+            className="w-full px-3 py-2 border rounded-md"
             placeholder="Jumlah"
             value={jumlah}
             onChange={(e) => setJumlah(e.target.value)}
             required
           />
         </div>
-        <div className="col-md-3">
+        <div className="col-span-1">
           <input
             type="date"
-            className="form-control"
+            className="w-full px-3 py-2 border rounded-md"
             value={tanggal}
             onChange={(e) => setTanggal(e.target.value)}
             required
           />
         </div>
-        <div className="col-md-2">
-          <button className="btn btn-primary w-100" type="submit">
+        <div className="col-span-1">
+          <button className="bg-blue-500 text-white w-full py-2 rounded-md" type="submit">
             Simpan
           </button>
         </div>
@@ -159,10 +158,10 @@ function TotalObatPerHari() {
 
 
       
-      <div className="mb-3 d-flex justify-content-between align-items-center">
+      <div className="mb-3 flex justify-between items-center">
         <input
             type="text"
-            className="form-control w-50"
+            className="w-1/2 px-3 py-2 border rounded-md"
             placeholder="Cari nama obat atau tanggal..."
             value={searchTerm}
             onChange={(e) => {
@@ -172,14 +171,14 @@ function TotalObatPerHari() {
         />
       </div>
 
-      <div className="table-responsive">
-        <table className="table table-bordered table-striped table-hover">
-          <thead className="table-dark text-center align-middle">
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-200">
+          <thead className="bg-gray-800 text-white text-center align-middle">
             <tr>
-              <th>Tanggal</th>
-              <th>Nama Obat</th>
-              <th>Total Obat</th>
-              <th>Total Pembayaran</th>
+              <th className="py-2 px-4">Tanggal</th>
+              <th className="py-2 px-4">Nama Obat</th>
+              <th className="py-2 px-4">Total Obat</th>
+              <th className="py-2 px-4">Total Pembayaran</th>
             </tr>
           </thead>
           <tbody>
@@ -192,23 +191,23 @@ function TotalObatPerHari() {
                 .map((item, idx) => (
 
               <tr key={idx}>
-                <td>{item.tanggal}</td>
-                <td style={{ cursor: 'pointer' }} onClick={() => handleIsiForm(item)}>
+                <td className="border px-4 py-2">{item.tanggal}</td>
+                <td className="border px-4 py-2 cursor-pointer" onClick={() => handleIsiForm(item)}>
                     <strong>{item.nama_obat}</strong>
                 </td>
-                <td className="text-end">{item.total_jumlah}</td>
-                <td className="text-end">{item.total_pembayaran}</td>
+                <td className="border px-4 py-2 text-right">{item.total_jumlah}</td>
+                <td className="border px-4 py-2 text-right">{item.total_pembayaran}</td>
               </tr>
             ))}
           </tbody>
         </table>
         <div
-            className="d-flex justify-content-between align-items-center mt-3 pb-5 bg-white sticky-bottom py-2 border-top"
+            className="flex justify-between items-center mt-3 pb-5 bg-white sticky bottom-0 py-2 border-t"
             style={{ zIndex: 10 }}
         >
 
             <button
-                className="btn btn-outline-primary"
+                className="bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded-md"
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
             >
@@ -218,7 +217,7 @@ function TotalObatPerHari() {
             <span>Halaman {currentPage}</span>
 
             <button
-                className="btn btn-outline-primary"
+                className="bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded-md"
                 onClick={() => {
                 const totalFiltered = rekap.filter(item =>
                     item.nama_obat.toLowerCase().includes(searchTerm.toLowerCase()) ||

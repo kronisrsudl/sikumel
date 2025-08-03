@@ -26,28 +26,48 @@ function Login() {
   };
 
   return (
-    <div className="container d-flex flex-column justify-content-center align-items-center vh-100">
-      <div className="card p-4" style={{ maxWidth: 400, width: '100%' }}>
-        <h4 className="text-center mb-3">🔐 Login SIKUMEL</h4>
-        {errMsg && <div className="alert alert-danger">{errMsg}</div>}
-        <form onSubmit={handleLogin}>
-          <input
-            type="text"
-            className="form-control mb-3"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            className="form-control mb-3"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <button className="btn btn-primary w-100">Login</button>
+    <div className="flex flex-col justify-center items-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-sm p-8 space-y-6 bg-white rounded-xl shadow-lg">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-gray-800">Login SIKUMEL</h2>
+          <p className="text-gray-500 mt-2">Selamat datang kembali!</p>
+        </div>
+        {errMsg && (
+          <div className="p-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+            {errMsg}
+          </div>
+        )}
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="sr-only" htmlFor="username">Username</label>
+            <input
+              id="username"
+              type="text"
+              className="w-full px-4 py-3 border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="sr-only" htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              className="w-full px-4 py-3 border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button 
+            type="submit"
+            className="w-full py-3 px-4 font-semibold text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105"
+          >
+            Login
+          </button>
         </form>
       </div>
     </div>
