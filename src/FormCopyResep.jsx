@@ -1,5 +1,4 @@
-// frontend/src/App.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 
 function FormCopyResep() {
@@ -20,6 +19,10 @@ function FormCopyResep() {
   const [jumlahSnippets, setJumlahSnippets] = useState([]);
   const [snippetObatIndex, setSnippetObatIndex] = useState(-1);
   const [snippetJumlahIndex, setSnippetJumlahIndex] = useState(-1);
+
+  const noRMInputRef = useRef(null);
+  const namaObatInputRef = useRef(null);
+  const jumlahInputRef = useRef(null);
 
   const today = new Date().toISOString().split('T')[0];
   const [tanggalAwal, setTanggalAwal] = useState(today);
@@ -102,6 +105,23 @@ useEffect(() => {
   };
 }, [showFabModal, modalTambahPasien]);
 
+  // Auto-focus inputs when modals open
+  useEffect(() => {
+    if (showFabModal) {
+      const timer = setTimeout(() => noRMInputRef.current?.focus(), 80);
+      return () => clearTimeout(timer);
+    }
+  }, [showFabModal]);
+
+  useEffect(() => {
+    if (modalInputObat) {
+      setSnippetObatIndex(-1);
+      setSnippetJumlahIndex(-1);
+      const timer = setTimeout(() => namaObatInputRef.current?.focus(), 80);
+      return () => clearTimeout(timer);
+    }
+  }, [modalInputObat]);
+
   // Keyboard shortcuts: Alt+T = open input, Alt+X = close modal
   useEffect(() => {
     const handleGlobalKeyDown = (e) => {
@@ -121,6 +141,8 @@ useEffect(() => {
           setHarga('');
           setJumlah(1);
           setJumlahSnippets([]);
+          setSnippetObatIndex(-1);
+          setSnippetJumlahIndex(-1);
         } else if (modalTambahPasien) {
           setModalTambahPasien(false);
         } else if (showFabModal) {
@@ -166,23 +188,30 @@ useEffect(() => {
     }
   };
 
-  const handleSelectSnippetObat = (item) => {
+  const handleSelectSnippetObat = (item, idx) => {
     setNamaObat(item.nama_obat);
     setHarga(item.harga);
     setSaranObat([]);
-    setSnippetObatIndex(-1);
-    // Set jumlah snippets for this medicine
+    const targetIdx = idx !== undefined ? idx : obatSering.findIndex(o => o.nama_obat === item.nama_obat);
+    setSnippetObatIndex(targetIdx);
     setJumlahSnippets(item.top_jumlah || []);
     setSnippetJumlahIndex(-1);
+    jumlahInputRef.current?.focus();
+    jumlahInputRef.current?.select();
   };
 
-  const handleSelectSnippetJumlah = (val) => {
+  const handleSelectSnippetJumlah = (val, idx) => {
     setJumlah(val);
+    if (idx !== undefined) {
+      setSnippetJumlahIndex(idx);
+    }
+    jumlahInputRef.current?.focus();
   };
 
   const handleObatChange = (e) => {
     const val = e.target.value;
     setNamaObat(val);
+    setSnippetObatIndex(-1);
     if (val.length >= 2) {
       const filter = dataObat.filter(o => o.nama_obat.toLowerCase().includes(val.toLowerCase()));
       setSaranObat(filter);
@@ -200,54 +229,85 @@ useEffect(() => {
   };
 
   const handleObatKeyDown = (e) => {
-    // Arrow navigation for obat snippet chips (when field is empty)
-    if (saranObat.length === 0 && !namaObat && obatSering.length > 0) {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    // 1. Arrow navigation for autocomplete suggestions
+    if (saranObat.length > 0) {
+      if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setSnippetObatIndex(prev => (prev + 1) % obatSering.length);
+        setHighlightIndex(prev => (prev + 1) % saranObat.length);
         return;
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setSnippetObatIndex(prev => (prev - 1 + obatSering.length) % obatSering.length);
+        setHighlightIndex(prev => (prev - 1 + saranObat.length) % saranObat.length);
         return;
-      } else if (e.key === 'Enter' && snippetObatIndex >= 0) {
+      } else if (e.key === 'Enter' && highlightIndex >= 0) {
         e.preventDefault();
-        handleSelectSnippetObat(obatSering[snippetObatIndex]);
+        const selected = saranObat[highlightIndex];
+        setNamaObat(selected.nama_obat);
+        setHarga(selected.harga);
+        setSaranObat([]);
+        const matched = obatSering.find(o => o.nama_obat.toLowerCase() === selected.nama_obat.toLowerCase());
+        if (matched) {
+          setJumlahSnippets(matched.top_jumlah || []);
+          const sIdx = obatSering.findIndex(o => o.nama_obat.toLowerCase() === selected.nama_obat.toLowerCase());
+          setSnippetObatIndex(sIdx);
+        } else {
+          setJumlahSnippets([]);
+          setSnippetObatIndex(-1);
+        }
+        jumlahInputRef.current?.focus();
+        jumlahInputRef.current?.select();
         return;
       }
     }
 
-    // Arrow navigation for autocomplete suggestions
-    if (saranObat.length === 0) return;
-    if (e.key === 'ArrowDown') {
-      setHighlightIndex(prev => (prev + 1) % saranObat.length);
-    } else if (e.key === 'ArrowUp') {
-      setHighlightIndex(prev => (prev - 1 + saranObat.length) % saranObat.length);
-    } else if (e.key === 'Enter' && highlightIndex >= 0) {
-      const selected = saranObat[highlightIndex];
-      setNamaObat(selected.nama_obat);
-      setHarga(selected.harga);
-      setSaranObat([]);
-      // Update jumlah snippets
-      const matchedFrequent = obatSering.find(o => o.nama_obat.toLowerCase() === selected.nama_obat.toLowerCase());
-      if (matchedFrequent) {
-        setJumlahSnippets(matchedFrequent.top_jumlah || []);
+    // 2. Arrow navigation for obat snippet chips (when not showing autocomplete dropdown)
+    if (obatSering.length > 0 && saranObat.length === 0) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const nextIdx = snippetObatIndex < 0 ? 0 : (snippetObatIndex + 1) % obatSering.length;
+        setSnippetObatIndex(nextIdx);
+        const selected = obatSering[nextIdx];
+        setNamaObat(selected.nama_obat);
+        setHarga(selected.harga);
+        setJumlahSnippets(selected.top_jumlah || []);
+        setSnippetJumlahIndex(-1);
+        return;
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prevIdx = snippetObatIndex <= 0 ? obatSering.length - 1 : snippetObatIndex - 1;
+        setSnippetObatIndex(prevIdx);
+        const selected = obatSering[prevIdx];
+        setNamaObat(selected.nama_obat);
+        setHarga(selected.harga);
+        setJumlahSnippets(selected.top_jumlah || []);
+        setSnippetJumlahIndex(-1);
+        return;
+      } else if (e.key === 'Enter') {
+        if (namaObat) {
+          e.preventDefault();
+          jumlahInputRef.current?.focus();
+          jumlahInputRef.current?.select();
+          return;
+        }
       }
-      e.preventDefault();
     }
   };
 
   const handleJumlahKeyDown = (e) => {
-    if (jumlahSnippets.length === 0) return;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      setSnippetJumlahIndex(prev => (prev + 1) % jumlahSnippets.length);
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
-      e.preventDefault();
-      setSnippetJumlahIndex(prev => (prev - 1 + jumlahSnippets.length) % jumlahSnippets.length);
-    } else if (e.key === 'Enter' && snippetJumlahIndex >= 0) {
-      e.preventDefault();
-      handleSelectSnippetJumlah(jumlahSnippets[snippetJumlahIndex]);
+    if (jumlahSnippets.length > 0) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const nextIdx = snippetJumlahIndex < 0 ? 0 : (snippetJumlahIndex + 1) % jumlahSnippets.length;
+        setSnippetJumlahIndex(nextIdx);
+        setJumlah(jumlahSnippets[nextIdx]);
+        return;
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prevIdx = snippetJumlahIndex <= 0 ? jumlahSnippets.length - 1 : snippetJumlahIndex - 1;
+        setSnippetJumlahIndex(prevIdx);
+        setJumlah(jumlahSnippets[prevIdx]);
+        return;
+      }
     }
   };
 
@@ -273,8 +333,11 @@ useEffect(() => {
       setHarga('');
       setJumlah(1);
       setJumlahSnippets([]);
+      setSnippetObatIndex(-1);
+      setSnippetJumlahIndex(-1);
       fetchSemuaObat();
       fetchObatSering();
+      namaObatInputRef.current?.focus();
     } catch (err) {
       alert('Gagal simpan obat');
     }
@@ -421,6 +484,7 @@ useEffect(() => {
               <div className="col-span-1">
                 <input
                   type="text"
+                  ref={noRMInputRef}
                   value={noRM}
                   onChange={e => setNoRM(e.target.value)}
                   placeholder="Masukkan No RM"
@@ -516,73 +580,37 @@ useEffect(() => {
               <div className="p-4">
 
                 {/* Snippet obat sering - floating cloud */}
-                {obatSering.length > 0 && !namaObat && (
-                  <div style={{
-                    marginBottom: '12px',
-                    padding: '8px',
-                    background: 'linear-gradient(135deg, #f0f9ff 0%, #e8f4fd 100%)',
-                    borderRadius: '10px',
-                    border: '1px solid #bde0fe'
-                  }}>
-                    <div style={{
-                      fontSize: '11px',
-                      color: '#64748b',
-                      marginBottom: '6px',
-                      fontWeight: '600',
-                      letterSpacing: '0.5px',
-                      textTransform: 'uppercase'
-                    }}>⚡ Obat terakhir dipakai</div>
-                    <div style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: '6px'
-                    }}>
-                      {obatSering.map((item, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => handleSelectSnippetObat(item)}
-                          style={{
-                            padding: '4px 10px',
-                            fontSize: '12px',
-                            borderRadius: '999px',
-                            border: snippetObatIndex === idx ? '1px solid #3b82f6' : '1px solid #93c5fd',
-                            background: snippetObatIndex === idx ? '#3b82f6' : 'rgba(255,255,255,0.85)',
-                            color: snippetObatIndex === idx ? '#fff' : '#1e40af',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            fontWeight: '500',
-                            lineHeight: '1.4',
-                            whiteSpace: 'nowrap',
-                            backdropFilter: 'blur(4px)',
-                            boxShadow: snippetObatIndex === idx ? '0 3px 8px rgba(59,130,246,0.3)' : '0 1px 2px rgba(0,0,0,0.05)',
-                            transform: snippetObatIndex === idx ? 'translateY(-1px)' : 'translateY(0)'
-                          }}
-                          onMouseEnter={e => {
-                            e.target.style.background = '#3b82f6';
-                            e.target.style.color = '#fff';
-                            e.target.style.borderColor = '#3b82f6';
-                            e.target.style.transform = 'translateY(-1px)';
-                            e.target.style.boxShadow = '0 3px 8px rgba(59,130,246,0.3)';
-                          }}
-                          onMouseLeave={e => {
-                            if (snippetObatIndex !== idx) {
-                              e.target.style.background = 'rgba(255,255,255,0.85)';
-                              e.target.style.color = '#1e40af';
-                              e.target.style.borderColor = '#93c5fd';
-                              e.target.style.transform = 'translateY(0)';
-                              e.target.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
-                            }
-                          }}
-                        >
-                          {item.nama_obat}
-                          <span style={{
-                            marginLeft: '4px',
-                            fontSize: '10px',
-                            opacity: 0.7
-                          }}>({item.count}×)</span>
-                        </button>
-                      ))}
+                {obatSering.length > 0 && saranObat.length === 0 && (
+                  <div className="mb-3 p-2.5 rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-sky-50 shadow-sm">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[11px] font-bold text-blue-900 tracking-wider uppercase flex items-center gap-1">
+                        ⚡ Obat sering dipakai
+                      </span>
+                      <span className="text-[10px] text-blue-600 bg-blue-100/80 px-1.5 py-0.5 rounded font-medium">
+                        Pilih dengan tombol ← →
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {obatSering.map((item, idx) => {
+                        const isSelected = snippetObatIndex === idx || (namaObat && item.nama_obat.toLowerCase() === namaObat.toLowerCase());
+                        return (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => handleSelectSnippetObat(item, idx)}
+                            className={`px-2.5 py-1 text-xs rounded-full border transition-all duration-150 font-medium whitespace-nowrap cursor-pointer ${
+                              isSelected
+                                ? 'bg-blue-600 text-white border-blue-600 shadow-md scale-105 ring-2 ring-blue-300'
+                                : 'bg-white/90 text-blue-800 border-blue-200 hover:bg-blue-500 hover:text-white hover:border-blue-500 shadow-sm'
+                            }`}
+                          >
+                            {item.nama_obat}
+                            <span className={`ml-1 text-[10px] ${isSelected ? 'text-blue-100' : 'text-blue-500'}`}>
+                              ({item.count}×)
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -591,6 +619,7 @@ useEffect(() => {
                   <label className="block mb-1">Nama Obat:</label>
                   <input
                     type="text"
+                    ref={namaObatInputRef}
                     className="w-full px-3 py-2 border rounded-md"
                     value={namaObat}
                     onChange={handleObatChange}
@@ -633,60 +662,46 @@ useEffect(() => {
 
                   {/* Jumlah snippets - shown when medicine is selected */}
                   {jumlahSnippets.length > 0 && (
-                    <div style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: '6px',
-                      marginBottom: '8px'
-                    }}>
-                      {jumlahSnippets.map((val, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => handleSelectSnippetJumlah(val)}
-                          style={{
-                            padding: '3px 12px',
-                            fontSize: '12px',
-                            borderRadius: '999px',
-                            border: (jumlah == val || snippetJumlahIndex === idx) ? '2px solid #10b981' : '1px solid #a7f3d0',
-                            background: jumlah == val ? '#10b981' : snippetJumlahIndex === idx ? '#34d399' : 'rgba(236,253,245,0.9)',
-                            color: (jumlah == val || snippetJumlahIndex === idx) ? '#fff' : '#065f46',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            fontWeight: '600',
-                            minWidth: '36px',
-                            textAlign: 'center',
-                            boxShadow: jumlah == val ? '0 2px 6px rgba(16,185,129,0.3)' : snippetJumlahIndex === idx ? '0 3px 8px rgba(52,211,153,0.3)' : '0 1px 2px rgba(0,0,0,0.05)',
-                            transform: snippetJumlahIndex === idx ? 'translateY(-1px)' : 'translateY(0)'
-                          }}
-                          onMouseEnter={e => {
-                            if (jumlah != val) {
-                              e.target.style.background = '#34d399';
-                              e.target.style.color = '#fff';
-                              e.target.style.borderColor = '#34d399';
-                              e.target.style.transform = 'translateY(-1px)';
-                            }
-                          }}
-                          onMouseLeave={e => {
-                            if (jumlah != val) {
-                              e.target.style.background = 'rgba(236,253,245,0.9)';
-                              e.target.style.color = '#065f46';
-                              e.target.style.borderColor = '#a7f3d0';
-                              e.target.style.transform = 'translateY(0)';
-                            }
-                          }}
-                        >
-                          {val}
-                        </button>
-                      ))}
+                    <div className="mb-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] font-semibold text-emerald-800 uppercase tracking-wide">
+                          Jumlah umum:
+                        </span>
+                        <span className="text-[10px] text-emerald-600">
+                          (Pilih dengan tombol ← →)
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {jumlahSnippets.map((val, idx) => {
+                          const isSelected = snippetJumlahIndex === idx || jumlah == val;
+                          return (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => handleSelectSnippetJumlah(val, idx)}
+                              className={`px-3 py-0.5 text-xs rounded-full border transition-all duration-150 font-semibold min-w-[36px] text-center cursor-pointer ${
+                                isSelected
+                                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md scale-105 ring-2 ring-emerald-300'
+                                  : 'bg-white text-emerald-800 border-emerald-300 hover:bg-emerald-500 hover:text-white shadow-sm'
+                              }`}
+                            >
+                              {val}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
 
                   <input
                     type="number"
+                    ref={jumlahInputRef}
                     className="w-full px-3 py-2 border rounded-md"
                     value={jumlah}
-                    onChange={e => setJumlah(e.target.value)}
+                    onChange={e => {
+                      setJumlah(e.target.value);
+                      setSnippetJumlahIndex(-1);
+                    }}
                     onKeyDown={handleJumlahKeyDown}
                     required
                   />
