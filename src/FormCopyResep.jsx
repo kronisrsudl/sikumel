@@ -34,9 +34,15 @@ function FormCopyResep() {
   const isAdmin = username === 'rsudl';
 
   const [showFabModal, setShowFabModal] = useState(false);
+  const [modalEditObat, setModalEditObat] = useState(false);
+  const [dataEdit, setDataEdit] = useState({
+    id: '',
+    nama_obat: '',
+    harga: '',
+    jumlah: ''
+  });
 
   const API = import.meta.env.VITE_API_URL;
-
 
   const fetchObatSering = async () => {
     try {
@@ -44,6 +50,21 @@ function FormCopyResep() {
       setObatSering(res.data);
     } catch (err) {
       console.error('Gagal ambil obat sering:', err);
+    }
+  };
+
+  const fetchSemuaObat = async () => {
+    try {
+      const res = await axios.get(`${API}/api/obat`, {
+        params: {
+          start: tanggalAwal,
+          end: tanggalAkhir,
+          search: searchKeyword
+        }
+      });
+      setSemuaObat(res.data);
+    } catch (err) {
+      console.error('Gagal ambil semua data obat:', err);
     }
   };
 
@@ -112,20 +133,7 @@ useEffect(() => {
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
   }, [isAdmin, modalEditObat, modalInputObat, modalTambahPasien, showFabModal]);
 
-  const fetchSemuaObat = async () => {
-    try {
-      const res = await axios.get(`${API}/api/obat`, {
-        params: {
-          start: tanggalAwal,
-          end: tanggalAkhir,
-          search: searchKeyword
-        }
-      });
-      setSemuaObat(res.data);
-    } catch (err) {
-      console.error('Gagal ambil semua data obat:', err);
-    }
-  };
+
 
 
 
@@ -289,13 +297,7 @@ useEffect(() => {
     }
   };
 
-  const [modalEditObat, setModalEditObat] = useState(false);
-  const [dataEdit, setDataEdit] = useState({
-    id: '',
-    nama_obat: '',
-    harga: '',
-    jumlah: ''
-  });
+
 
   const bukaModalEdit = (item) => {
     setDataEdit({
