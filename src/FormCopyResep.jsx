@@ -18,6 +18,8 @@ function FormCopyResep() {
   const [semuaObat, setSemuaObat] = useState([]);
   const [obatSering, setObatSering] = useState([]);
   const [jumlahSnippets, setJumlahSnippets] = useState([]);
+  const [snippetObatIndex, setSnippetObatIndex] = useState(-1);
+  const [snippetJumlahIndex, setSnippetJumlahIndex] = useState(-1);
 
   const today = new Date().toISOString().split('T')[0];
   const [tanggalAwal, setTanggalAwal] = useState(today);
@@ -79,6 +81,36 @@ useEffect(() => {
   };
 }, [showFabModal, modalTambahPasien]);
 
+  // Keyboard shortcuts: Alt+T = open input, Alt+X = close modal
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if (e.altKey && (e.key === 't' || e.key === 'T')) {
+        e.preventDefault();
+        if (isAdmin) {
+          setShowFabModal(true);
+        }
+      }
+      if (e.altKey && (e.key === 'x' || e.key === 'X')) {
+        e.preventDefault();
+        if (modalEditObat) {
+          setModalEditObat(false);
+        } else if (modalInputObat) {
+          setModalInputObat(false);
+          setNamaObat('');
+          setHarga('');
+          setJumlah(1);
+          setJumlahSnippets([]);
+        } else if (modalTambahPasien) {
+          setModalTambahPasien(false);
+        } else if (showFabModal) {
+          setShowFabModal(false);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleGlobalKeyDown);
+    return () => document.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [isAdmin, modalEditObat, modalInputObat, modalTambahPasien, showFabModal]);
 
   const fetchSemuaObat = async () => {
     try {
@@ -130,8 +162,10 @@ useEffect(() => {
     setNamaObat(item.nama_obat);
     setHarga(item.harga);
     setSaranObat([]);
+    setSnippetObatIndex(-1);
     // Set jumlah snippets for this medicine
     setJumlahSnippets(item.top_jumlah || []);
+    setSnippetJumlahIndex(-1);
   };
 
   const handleSelectSnippetJumlah = (val) => {
@@ -158,6 +192,24 @@ useEffect(() => {
   };
 
   const handleObatKeyDown = (e) => {
+    // Arrow navigation for obat snippet chips (when field is empty)
+    if (saranObat.length === 0 && !namaObat && obatSering.length > 0) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSnippetObatIndex(prev => (prev + 1) % obatSering.length);
+        return;
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSnippetObatIndex(prev => (prev - 1 + obatSering.length) % obatSering.length);
+        return;
+      } else if (e.key === 'Enter' && snippetObatIndex >= 0) {
+        e.preventDefault();
+        handleSelectSnippetObat(obatSering[snippetObatIndex]);
+        return;
+      }
+    }
+
+    // Arrow navigation for autocomplete suggestions
     if (saranObat.length === 0) return;
     if (e.key === 'ArrowDown') {
       setHighlightIndex(prev => (prev + 1) % saranObat.length);
@@ -174,6 +226,20 @@ useEffect(() => {
         setJumlahSnippets(matchedFrequent.top_jumlah || []);
       }
       e.preventDefault();
+    }
+  };
+
+  const handleJumlahKeyDown = (e) => {
+    if (jumlahSnippets.length === 0) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSnippetJumlahIndex(prev => (prev + 1) % jumlahSnippets.length);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSnippetJumlahIndex(prev => (prev - 1 + jumlahSnippets.length) % jumlahSnippets.length);
+    } else if (e.key === 'Enter' && snippetJumlahIndex >= 0) {
+      e.preventDefault();
+      handleSelectSnippetJumlah(jumlahSnippets[snippetJumlahIndex]);
     }
   };
 
@@ -478,16 +544,17 @@ useEffect(() => {
                             padding: '4px 10px',
                             fontSize: '12px',
                             borderRadius: '999px',
-                            border: '1px solid #93c5fd',
-                            background: 'rgba(255,255,255,0.85)',
-                            color: '#1e40af',
+                            border: snippetObatIndex === idx ? '1px solid #3b82f6' : '1px solid #93c5fd',
+                            background: snippetObatIndex === idx ? '#3b82f6' : 'rgba(255,255,255,0.85)',
+                            color: snippetObatIndex === idx ? '#fff' : '#1e40af',
                             cursor: 'pointer',
                             transition: 'all 0.2s ease',
                             fontWeight: '500',
                             lineHeight: '1.4',
                             whiteSpace: 'nowrap',
                             backdropFilter: 'blur(4px)',
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                            boxShadow: snippetObatIndex === idx ? '0 3px 8px rgba(59,130,246,0.3)' : '0 1px 2px rgba(0,0,0,0.05)',
+                            transform: snippetObatIndex === idx ? 'translateY(-1px)' : 'translateY(0)'
                           }}
                           onMouseEnter={e => {
                             e.target.style.background = '#3b82f6';
@@ -497,11 +564,13 @@ useEffect(() => {
                             e.target.style.boxShadow = '0 3px 8px rgba(59,130,246,0.3)';
                           }}
                           onMouseLeave={e => {
-                            e.target.style.background = 'rgba(255,255,255,0.85)';
-                            e.target.style.color = '#1e40af';
-                            e.target.style.borderColor = '#93c5fd';
-                            e.target.style.transform = 'translateY(0)';
-                            e.target.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+                            if (snippetObatIndex !== idx) {
+                              e.target.style.background = 'rgba(255,255,255,0.85)';
+                              e.target.style.color = '#1e40af';
+                              e.target.style.borderColor = '#93c5fd';
+                              e.target.style.transform = 'translateY(0)';
+                              e.target.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+                            }
                           }}
                         >
                           {item.nama_obat}
@@ -577,15 +646,16 @@ useEffect(() => {
                             padding: '3px 12px',
                             fontSize: '12px',
                             borderRadius: '999px',
-                            border: jumlah == val ? '2px solid #10b981' : '1px solid #a7f3d0',
-                            background: jumlah == val ? '#10b981' : 'rgba(236,253,245,0.9)',
-                            color: jumlah == val ? '#fff' : '#065f46',
+                            border: (jumlah == val || snippetJumlahIndex === idx) ? '2px solid #10b981' : '1px solid #a7f3d0',
+                            background: jumlah == val ? '#10b981' : snippetJumlahIndex === idx ? '#34d399' : 'rgba(236,253,245,0.9)',
+                            color: (jumlah == val || snippetJumlahIndex === idx) ? '#fff' : '#065f46',
                             cursor: 'pointer',
                             transition: 'all 0.2s ease',
                             fontWeight: '600',
                             minWidth: '36px',
                             textAlign: 'center',
-                            boxShadow: jumlah == val ? '0 2px 6px rgba(16,185,129,0.3)' : '0 1px 2px rgba(0,0,0,0.05)'
+                            boxShadow: jumlah == val ? '0 2px 6px rgba(16,185,129,0.3)' : snippetJumlahIndex === idx ? '0 3px 8px rgba(52,211,153,0.3)' : '0 1px 2px rgba(0,0,0,0.05)',
+                            transform: snippetJumlahIndex === idx ? 'translateY(-1px)' : 'translateY(0)'
                           }}
                           onMouseEnter={e => {
                             if (jumlah != val) {
@@ -615,6 +685,7 @@ useEffect(() => {
                     className="w-full px-3 py-2 border rounded-md"
                     value={jumlah}
                     onChange={e => setJumlah(e.target.value)}
+                    onKeyDown={handleJumlahKeyDown}
                     required
                   />
                 </div>
