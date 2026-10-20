@@ -16,6 +16,8 @@ function FormCopyResep() {
   const [saranObat, setSaranObat] = useState([]);
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const [semuaObat, setSemuaObat] = useState([]);
+  const [obatSering, setObatSering] = useState([]);
+  const [jumlahSnippets, setJumlahSnippets] = useState([]);
 
   const today = new Date().toISOString().split('T')[0];
   const [tanggalAwal, setTanggalAwal] = useState(today);
@@ -34,6 +36,15 @@ function FormCopyResep() {
   const API = import.meta.env.VITE_API_URL;
 
 
+  const fetchObatSering = async () => {
+    try {
+      const res = await axios.get(`${API}/api/obat-sering`);
+      setObatSering(res.data);
+    } catch (err) {
+      console.error('Gagal ambil obat sering:', err);
+    }
+  };
+
   useEffect(() => {
     
     const fetchDataObat = async () => {
@@ -47,6 +58,7 @@ function FormCopyResep() {
 
     fetchDataObat();
     fetchSemuaObat(); // ini akan ambil data berdasarkan filter aktif
+    fetchObatSering();
   }, [tanggalAwal, tanggalAkhir, searchKeyword]);
 
   // ✅ Untuk kontrol backdrop modal
@@ -92,6 +104,7 @@ useEffect(() => {
       setNamaPasien(res.data.nama_pasien);
       setCurrentNoRM(noRM);
       setModalInputObat(true);
+      fetchObatSering();
     } catch (err) {
       setModalTambahPasien(true);
     }
@@ -113,6 +126,18 @@ useEffect(() => {
     }
   };
 
+  const handleSelectSnippetObat = (item) => {
+    setNamaObat(item.nama_obat);
+    setHarga(item.harga);
+    setSaranObat([]);
+    // Set jumlah snippets for this medicine
+    setJumlahSnippets(item.top_jumlah || []);
+  };
+
+  const handleSelectSnippetJumlah = (val) => {
+    setJumlah(val);
+  };
+
   const handleObatChange = (e) => {
     const val = e.target.value;
     setNamaObat(val);
@@ -122,6 +147,13 @@ useEffect(() => {
       setHighlightIndex(-1);
     } else {
       setSaranObat([]);
+    }
+    // Update jumlah snippets when medicine name changes
+    const matchedFrequent = obatSering.find(o => o.nama_obat.toLowerCase() === val.toLowerCase());
+    if (matchedFrequent) {
+      setJumlahSnippets(matchedFrequent.top_jumlah || []);
+    } else {
+      setJumlahSnippets([]);
     }
   };
 
@@ -136,6 +168,11 @@ useEffect(() => {
       setNamaObat(selected.nama_obat);
       setHarga(selected.harga);
       setSaranObat([]);
+      // Update jumlah snippets
+      const matchedFrequent = obatSering.find(o => o.nama_obat.toLowerCase() === selected.nama_obat.toLowerCase());
+      if (matchedFrequent) {
+        setJumlahSnippets(matchedFrequent.top_jumlah || []);
+      }
       e.preventDefault();
     }
   };
@@ -161,7 +198,9 @@ useEffect(() => {
       setNamaObat('');
       setHarga('');
       setJumlah(1);
+      setJumlahSnippets([]);
       fetchSemuaObat();
+      fetchObatSering();
     } catch (err) {
       alert('Gagal simpan obat');
     }
@@ -386,7 +425,7 @@ useEffect(() => {
       {/* Modal input obat */}
       {modalInputObat && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-auto">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md mx-auto" style={{ maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
             <div className="p-4 border-b">
               <h5 className="text-lg font-bold">
                 Input Obat untuk Pasien: {namaPasien} (RM: {currentNoRM})
@@ -400,12 +439,83 @@ useEffect(() => {
                   setNamaObat('');
                   setHarga('');
                   setJumlah(1);
+                  setJumlahSnippets([]);
                 }}
               >&times;</button>
             </div>
 
-            <form onSubmit={handleSubmitObat}>
+            <form onSubmit={handleSubmitObat} style={{ flex: 1, overflow: 'auto' }}>
               <div className="p-4">
+
+                {/* Snippet obat sering - floating cloud */}
+                {obatSering.length > 0 && !namaObat && (
+                  <div style={{
+                    marginBottom: '12px',
+                    padding: '8px',
+                    background: 'linear-gradient(135deg, #f0f9ff 0%, #e8f4fd 100%)',
+                    borderRadius: '10px',
+                    border: '1px solid #bde0fe'
+                  }}>
+                    <div style={{
+                      fontSize: '11px',
+                      color: '#64748b',
+                      marginBottom: '6px',
+                      fontWeight: '600',
+                      letterSpacing: '0.5px',
+                      textTransform: 'uppercase'
+                    }}>⚡ Obat terakhir dipakai</div>
+                    <div style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '6px'
+                    }}>
+                      {obatSering.map((item, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleSelectSnippetObat(item)}
+                          style={{
+                            padding: '4px 10px',
+                            fontSize: '12px',
+                            borderRadius: '999px',
+                            border: '1px solid #93c5fd',
+                            background: 'rgba(255,255,255,0.85)',
+                            color: '#1e40af',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            fontWeight: '500',
+                            lineHeight: '1.4',
+                            whiteSpace: 'nowrap',
+                            backdropFilter: 'blur(4px)',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                          }}
+                          onMouseEnter={e => {
+                            e.target.style.background = '#3b82f6';
+                            e.target.style.color = '#fff';
+                            e.target.style.borderColor = '#3b82f6';
+                            e.target.style.transform = 'translateY(-1px)';
+                            e.target.style.boxShadow = '0 3px 8px rgba(59,130,246,0.3)';
+                          }}
+                          onMouseLeave={e => {
+                            e.target.style.background = 'rgba(255,255,255,0.85)';
+                            e.target.style.color = '#1e40af';
+                            e.target.style.borderColor = '#93c5fd';
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+                          }}
+                        >
+                          {item.nama_obat}
+                          <span style={{
+                            marginLeft: '4px',
+                            fontSize: '10px',
+                            opacity: 0.7
+                          }}>({item.count}×)</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="mb-3">
                   <label className="block mb-1">Nama Obat:</label>
                   <input
@@ -418,7 +528,7 @@ useEffect(() => {
                     required
                   />
                   {saranObat.length > 0 && (
-                    <ul className="mt-2 border rounded-md">
+                    <ul className="mt-2 border rounded-md" style={{ maxHeight: '150px', overflowY: 'auto' }}>
                       {saranObat.map((item, idx) => (
                         <li
                           key={idx}
@@ -429,6 +539,10 @@ useEffect(() => {
                             setNamaObat(item.nama_obat);
                             setHarga(item.harga);
                             setSaranObat([]);
+                            const matchedFrequent = obatSering.find(o => o.nama_obat.toLowerCase() === item.nama_obat.toLowerCase());
+                            if (matchedFrequent) {
+                              setJumlahSnippets(matchedFrequent.top_jumlah || []);
+                            }
                           }}
                         >
                           {item.nama_obat} ({item.harga})
@@ -445,6 +559,57 @@ useEffect(() => {
 
                 <div className="mb-3">
                   <label className="block mb-1">Jumlah:</label>
+
+                  {/* Jumlah snippets - shown when medicine is selected */}
+                  {jumlahSnippets.length > 0 && (
+                    <div style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '6px',
+                      marginBottom: '8px'
+                    }}>
+                      {jumlahSnippets.map((val, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleSelectSnippetJumlah(val)}
+                          style={{
+                            padding: '3px 12px',
+                            fontSize: '12px',
+                            borderRadius: '999px',
+                            border: jumlah == val ? '2px solid #10b981' : '1px solid #a7f3d0',
+                            background: jumlah == val ? '#10b981' : 'rgba(236,253,245,0.9)',
+                            color: jumlah == val ? '#fff' : '#065f46',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                            fontWeight: '600',
+                            minWidth: '36px',
+                            textAlign: 'center',
+                            boxShadow: jumlah == val ? '0 2px 6px rgba(16,185,129,0.3)' : '0 1px 2px rgba(0,0,0,0.05)'
+                          }}
+                          onMouseEnter={e => {
+                            if (jumlah != val) {
+                              e.target.style.background = '#34d399';
+                              e.target.style.color = '#fff';
+                              e.target.style.borderColor = '#34d399';
+                              e.target.style.transform = 'translateY(-1px)';
+                            }
+                          }}
+                          onMouseLeave={e => {
+                            if (jumlah != val) {
+                              e.target.style.background = 'rgba(236,253,245,0.9)';
+                              e.target.style.color = '#065f46';
+                              e.target.style.borderColor = '#a7f3d0';
+                              e.target.style.transform = 'translateY(0)';
+                            }
+                          }}
+                        >
+                          {val}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
                   <input
                     type="number"
                     className="w-full px-3 py-2 border rounded-md"
@@ -467,6 +632,7 @@ useEffect(() => {
                     setNamaObat('');
                     setHarga('');
                     setJumlah(1);
+                    setJumlahSnippets([]);
                   }}
                 >
                   Selesai
